@@ -4,37 +4,47 @@
 ## existing persistent volumes in OpenShift from Gluster/RHOCS
 ##
 
+## Environment variables .ini file should be provided as argument
+if [ -f $1 ]
+then
+  source $1
+else
+  echo "You have to provide a ini file with environment variables as a parameter"
+  echo "Example: `basename $0 myvars.ini`"
+  exit 1
+fi
+
 ## Environment variables: (you can also put them in a .ini kind of file)
 ## Deployment mode for RHOCS cluster: converged (CNS) or independent (CRS)
-RHOCSMODE="converged" 
+##RHOCSMODE="converged" 
 
 ## Authentication variables for accessing OpenShift cluster or 
 ## Gluster nodes depending on deployment mode
-OCADDRESS="https://master.refarch311.makestoragegreatagain.com:443"
-OCUSER="openshift"
-OCPASS="redhat"
-OCPROJECT="app-storage" ## OpenShift project where gluster cluster lives
+##OCADDRESS="https://master.refarch311.makestoragegreatagain.com:443"
+##OCUSER="openshift"
+##OCPASS="redhat"
+##OCPROJECT="app-storage" ## OpenShift project where gluster cluster lives
 
 ## For "independent" mode, it's required to have passwordless SSH 
 ## from this root user to gluster server root
 ## Any of the Gluster nodes from RHOCS cluster you want to protect
-GLUSTERSERVER=172.16.31.173
-BASTIONHOST=172.16.0.119
+##GLUSTERSERVER=172.16.31.173
 
 ## Temporary file to put the list of Gluster Snapshots to dismount and delete
-SNAPLIST=/root/snaplist-`date +%Y%m%d-%H:%M`.txt 
+SNAPLIST=$SNAPDIR/snaplist-`date +%Y%m%d-%H:%M`.txt 
 
 ## Heketi Route and Credentials
-USERHEKETI=admin ## User with admin permissions to dialog with Heketi
-SECRETHEKETI="xzAqO62qTPlacNjk3oIX53n2+Z0Z6R1Gfr0wC+z+sGk=" ## Heketi user key
-HEKETI_CLI_SERVER=http://heketi-storage-app-storage.apps.refarch311.makestoragegreatagain.com ## Route where Heketi pod is listening
+##USERHEKETI=admin ## User with admin permissions to dialog with Heketi
+##SECRETHEKETI="xzAqO62qTPlacNjk3oIX53n2+Z0Z6R1Gfr0wC+z+sGk=" ## Heketi user key
+##HEKETI_CLI_SERVER=http://heketi-storage-app-storage.apps.refarch311.makestoragegreatagain.com ## Route where Heketi pod is listening
 
 ## Provides Logging of this script in the dir specified below:
-#LOG="/root/$0-`date +%Y%m%d-%H:%M`.log"
-#exec &>> $LOG
+LOG="${LOGDIR}/`basename $0`-`date +%Y%m%d-%H:%M`.log"
+exec &>> $LOG
 
+BASTIONHOST=localhost
 ## Source and destination of backups without date
-PARENTMOUNT=/mnt/source  ## Parent directory for all volumes mounting without date
+PARENTMOUNT=$PARENTDIR  ## Parent directory for all volumes mounting without date
 
 ## Get list of Persistent Volumes Snapshots mounted in this server, 
 ## store them in file $SNAPLIST 
